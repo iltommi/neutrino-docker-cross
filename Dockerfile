@@ -26,7 +26,7 @@ RUN dnf -y install 'dnf-command(copr)';   \
 
 # pyhthonqt
 RUN git clone https://github.com/iltommi/PythonQt.git && cd PythonQt && mkdir cross && cd cross; \
-    cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_FIND_ROOT_PATH=/usr/i686-w64-mingw32 -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=i686-w64-mingw32-c++ -DCMAKE_RC_COMPILER=i686-w64-mingw32-windres -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DPYTHON_LIBRARY=/usr/i686-w64-mingw32/sys-root/mingw/bin/libpython2.7.dll -DPYTHON_INCLUDE_DIRS=/usr/i686-w64-mingw32/sys-root/mingw/include -UQT_QMAKE_EXECUTABLE -DQt5_DIR=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmake/Qt5/ -DCMAKE_INSTALL_PREFIX:PATH=/usr/i686-w64-mingw32/sys-root/mingw .. ; \
+    cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_FIND_ROOT_PATH=/usr/i686-w64-mingw32 -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=i686-w64-mingw32-c++ -DCMAKE_RC_COMPILER=i686-w64-mingw32-windres -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DPYTHON_LIBRARY=/usr/i686-w64-mingw32/sys-root/mingw/bin/libpython2.7.dll -DPYTHON_INCLUDE_DIRS=/usr/i686-w64-mingw32/sys-root/mingw/include -UQT_QMAKE_EXECUTABLE -DQt5_DIR=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmake/Qt5/ -DCMAKE_INSTALL_PREFIX:PATH=/usr/i686-w64-mingw32/sys-root/mingw  -DPythonQt_Wrap_QtAll=TRUE .. ; \
     make -j$(nproc) install
 
 # neutrino
