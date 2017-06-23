@@ -18,6 +18,37 @@ RUN wget http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio3410.tar.gz &
     cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=i686-w64-mingw32-c++ -DCMAKE_RC_COMPILER=i686-w64-mingw32-windres -DCMAKE_INSTALL_PREFIX:PATH=/usr/i686-w64-mingw32/sys-root/mingw .. && make -j$(nproc) install; \
     /bin/mv /usr/i686-w64-mingw32/sys-root/mingw/lib/libcfitsio.dll /usr/i686-w64-mingw32/sys-root/mingw/bin
 
+RUN dnf install -y autoconf automake bash bison bzip2 flex gcc-c++ gdk-pixbuf2-devel gettext git gperf intltool make sed libffi-devel libtool openssl-devel p7zip patch perl pkgconfig python ruby scons unzip wget xz gtk-doc dh-autoreconf 
+
+# RUN git clone https://github.com/mxe/mxe.git && cd mxe && make hdf4 hdf5 MXE_TARGETS=i686-w64-mingw32.shared
+# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/bin/libdf-0.dll /usr/i686-w64-mingw32/sys-root/mingw/bin
+# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/bin/libmfhdf-0.dll /usr/i686-w64-mingw32/sys-root/mingw/bin
+# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/bin/libjpeg-9.dll /usr/i686-w64-mingw32/sys-root/mingw/bin
+# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/bin/libportablexdr-0.dll /usr/i686-w64-mingw32/sys-root/mingw/bin
+# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/include/df* /usr/i686-w64-mingw32/sys-root/mingw/include/
+# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/include/hdf* /usr/i686-w64-mingw32/sys-root/mingw/include/
+# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/include/mfhdf* /usr/i686-w64-mingw32/sys-root/mingw/include/
+# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/lib/libdf* /usr/i686-w64-mingw32/sys-root/mingw/lib
+# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/lib/libmf* /usr/i686-w64-mingw32/sys-root/mingw/lib
+
+RUN dnf install -y mingw32-portablexdr
+
+RUN wget https://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.10/src/hdf-4.2.10.tar.bz2 && tar -jxvf hdf-4.2.10.tar.bz2; \
+    cd hdf-4.2.10; \
+    wget https://raw.githubusercontent.com/mxe/mxe/master/src/hdf4-1-portability-fixes.patch; \
+    wget https://raw.githubusercontent.com/mxe/mxe/master/src/hdf4-2-dllimport.patch; \
+    patch -p1 -u < hdf4-1-portability-fixes.patch ; \
+    patch -p1 -u < hdf4-2-dllimport.patch ; \
+    libtoolize --force; \
+    autoreconf --install; \
+    ./configure --host='i686-w64-mingw32' --build='x86_64-unknown-linux-gnu' --prefix='/usr/i686-w64-mingw32/sys-root/mingw'  --disable-static --enable-shared  ac_cv_prog_HAVE_DOXYGEN="false" --disable-doxygen --disable-fortran --disable-netcdf LIBS="-lportablexdr -lws2_32"  CPPFLAGS="-DH4_F77_FUNC\(name,NAME\)=NAME -DH4_BUILT_AS_DYNAMIC_LIB=1 -DBIG_LONGS"; \
+    make -C mfhdf/xdr -j $(nproc) LDFLAGS=-no-undefined; \
+    make -C hdf/src -j $(nproc) LDFLAGS=-no-undefined; \
+    make -C hdf/src -j 1 install; \
+    make -C mfhdf/libsrc -j $(nproc) LDFLAGS="-no-undefined -ldf"; \
+    make -C mfhdf/libsrc -j 1 install
+
+
 # pyhton 
 RUN dnf -y install 'dnf-command(copr)';    \
     dnf -y copr enable smani/mingw-extras; \
