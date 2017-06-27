@@ -1,42 +1,27 @@
 FROM fedora:latest
 
-RUN dnf -y update && dnf -y install cmake git mingw32-qt5* mingw32-gcc-c++ mingw32-gcc mingw32-gcc-gfortran mingw32-libgomp mingw32-gsl mingw32-zlib mingw32-nsis unzip wget
+RUN dnf -y update && dnf -y install cmake git mingw32-qt5* mingw32-gcc-c++ mingw32-gcc mingw32-gcc-gfortran mingw32-libgomp mingw32-gsl mingw32-zlib mingw32-nsis unzip wget autoconf automake bash bison bzip2 flex gcc-c++ gdk-pixbuf2-devel gettext git gperf intltool make sed libffi-devel libtool openssl-devel p7zip patch perl pkgconfig python ruby scons unzip wget xz gtk-doc dh-autoreconf mingw32-portablexdr 
+
+# pyhton 
+RUN dnf -y install 'dnf-command(copr)';    \
+    dnf -y copr enable smani/mingw-extras; \
+    dnf -y update;                         \
+    dnf -y install mingw32-python2 mingw32-cfitsio
 
 #fftw
-
-RUN /bin/bash -c ' mkdir fftw3 && cd fftw3;                                                          \
-    wget ftp://ftp.fftw.org/pub/fftw/fftw-3.3.5-dll32.zip && unzip fftw-3.3.5-dll32.zip;             \
-	for i in *.def; do i686-w64-mingw32-dlltool -d $i -l `basename ${i} .def`.dll.a; done;           \
-	/bin/cp *.dll /usr/i686-w64-mingw32/sys-root/mingw/bin;                                          \
-    /bin/cp fftw3* /usr/i686-w64-mingw32/sys-root/mingw/include;                                     \
-    /bin/cp *.dll.a /usr/i686-w64-mingw32/sys-root/mingw/lib;                                        '
- 
-
-# cfits
-RUN wget http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio3410.tar.gz && tar -zxvf cfitsio3410.tar.gz; \
-    cd cfitsio && mkdir cross && cd cross; \
-    cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=i686-w64-mingw32-c++ -DCMAKE_RC_COMPILER=i686-w64-mingw32-windres -DCMAKE_INSTALL_PREFIX:PATH=/usr/i686-w64-mingw32/sys-root/mingw .. && make -j$(nproc) install; \
-    /bin/mv /usr/i686-w64-mingw32/sys-root/mingw/lib/libcfitsio.dll /usr/i686-w64-mingw32/sys-root/mingw/bin
-
-RUN dnf install -y autoconf automake bash bison bzip2 flex gcc-c++ gdk-pixbuf2-devel gettext git gperf intltool make sed libffi-devel libtool openssl-devel p7zip patch perl pkgconfig python ruby scons unzip wget xz gtk-doc dh-autoreconf 
-
-# RUN git clone https://github.com/mxe/mxe.git && cd mxe && make hdf4 hdf5 MXE_TARGETS=i686-w64-mingw32.shared
-# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/bin/libdf-0.dll /usr/i686-w64-mingw32/sys-root/mingw/bin
-# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/bin/libmfhdf-0.dll /usr/i686-w64-mingw32/sys-root/mingw/bin
-# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/bin/libjpeg-9.dll /usr/i686-w64-mingw32/sys-root/mingw/bin
-# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/bin/libportablexdr-0.dll /usr/i686-w64-mingw32/sys-root/mingw/bin
-# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/include/df* /usr/i686-w64-mingw32/sys-root/mingw/include/
-# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/include/hdf* /usr/i686-w64-mingw32/sys-root/mingw/include/
-# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/include/mfhdf* /usr/i686-w64-mingw32/sys-root/mingw/include/
-# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/lib/libdf* /usr/i686-w64-mingw32/sys-root/mingw/lib
-# RUN ln -sf /mxe/usr/i686-w64-mingw32.shared/lib/libmf* /usr/i686-w64-mingw32/sys-root/mingw/lib
-
-RUN dnf install -y mingw32-portablexdr
-
+RUN /bin/bash -c ' mkdir fftw3 && cd fftw3;\
+    wget http://www.fftw.org/fftw-3.3.6-pl1.tar.gz;\
+    tar -zxvf fftw-3.3.6-pl1.tar.gz; \
+    cd fftw-3.3.6-pl1; \
+    ./configure --host='i686-w64-mingw32' --build='x86_64-unknown-linux-gnu' --prefix='/usr/i686-w64-mingw32/sys-root/mingw' --disable-static --enable-shared  ac_cv_prog_HAVE_DOXYGEN="false" --enable-threads --with-combined-threads ; \
+    make -j $(nproc) bin_PROGRAMS= sbin_PROGRAMS= noinst_PROGRAMS=    ;\
+    make install bin_PROGRAMS= sbin_PROGRAMS= noinst_PROGRAMS=   '
+    
+#hdf4
 RUN wget https://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.10/src/hdf-4.2.10.tar.bz2 && tar -jxvf hdf-4.2.10.tar.bz2; \
     cd hdf-4.2.10; \
-    wget https://raw.githubusercontent.com/mxe/mxe/master/src/hdf4-1-portability-fixes.patch; \
-    wget https://raw.githubusercontent.com/mxe/mxe/master/src/hdf4-2-dllimport.patch; \
+    wget https://raw.githubusercontent.com/iltommi/mxe/master/src/hdf4-1-portability-fixes.patch; \
+    wget https://raw.githubusercontent.com/iltommi/mxe/master/src/hdf4-2-dllimport.patch; \
     patch -p1 -u < hdf4-1-portability-fixes.patch ; \
     patch -p1 -u < hdf4-2-dllimport.patch ; \
     libtoolize --force; \
@@ -48,12 +33,23 @@ RUN wget https://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.10/src/hdf-4.2.10.
     make -C mfhdf/libsrc -j $(nproc) LDFLAGS="-no-undefined -ldf"; \
     make -C mfhdf/libsrc -j 1 install
 
-
-# pyhton 
-RUN dnf -y install 'dnf-command(copr)';    \
-    dnf -y copr enable smani/mingw-extras; \
-    dnf -y update;                         \
-    dnf -y install mingw32-python2
+# hdf5
+# RUN wget https://support.hdfgroup.org/ftp/HDF5/prev-releases/hdf5-1.8/hdf5-1.8.12/src/hdf5-1.8.12.tar.gz; \
+#     tar -zxvf hdf5-1.8.12.tar.gz; \
+#     cd hdf5-1.8.12; \
+#     wget https://raw.githubusercontent.com/iltommi/mxe/master/src/hdf5-1-disable-configure-try-run.patch; \
+#     wget https://raw.githubusercontent.com/iltommi/mxe/master/src/hdf5-2-platform-detection.patch; \
+#     wget https://raw.githubusercontent.com/iltommi/mxe/master/src/hdf5-3-fix-autoconf-version.patch; \
+#     patch -p1 -u < hdf5-1-disable-configure-try-run.patch; \
+#     patch -p1 -u < hdf5-2-platform-detection.patch; \
+#     patch -p1 -u < hdf5-3-fix-autoconf-version.patch; \
+#     autoreconf --force --install; \
+#     ./configure --host='i686-w64-mingw32' --build='x86_64-unknown-linux-gnu' --prefix='/usr/i686-w64-mingw32/sys-root/mingw' --disable-static --enable-shared  ac_cv_prog_HAVE_DOXYGEN="false" --disable-doxygen --enable-cxx --disable-direct-vfd  CPPFLAGS='-DH5_HAVE_WIN32_API -DH5_HAVE_MINGW -DHAVE_WINDOWS_PATH -DH5_BUILT_AS_DYNAMIC_LIB'; \
+#     sed -i 's,allow_undefined_flag="unsupported",allow_undefined_flag="",g' 'libtool'; \
+#     for f in H5detect.exe H5make_libsettings.exe libhdf5.settings; do make -C src $f && install -m755 src/$f /usr/i686-w64-mingw32/sys-root/mingw/bin/; done; \
+#     
+    
+        
 
 # pyhthonqt
 RUN git clone https://github.com/iltommi/PythonQt.git && cd PythonQt && mkdir cross && cd cross; \
