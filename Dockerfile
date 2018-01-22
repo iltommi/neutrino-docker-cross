@@ -49,20 +49,12 @@ RUN wget https://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.10/src/hdf-4.2.10.
 #     sed -i 's,allow_undefined_flag="unsupported",allow_undefined_flag="",g' 'libtool'; \
 #     for f in H5detect.exe H5make_libsettings.exe libhdf5.settings; do make -C src $f && install -m755 src/$f /usr/i686-w64-mingw32/sys-root/mingw/bin/; done; \
 #     
-
-# pyhthonqt
-#RUN git clone https://github.com/iltommi/PythonQt-1.git && cd PythonQt-1 && mingw32-qmake-qt5 && make -j$(nproc) && make install ; \
-#    cp -r include/* /usr/i686-w64-mingw32/sys-root/mingw/include ; \
-#    cp /PythonQt-1/lib/*.dll /usr/i686-w64-mingw32/sys-root/mingw/bin ; \
-#    cp /PythonQt-1/lib/*.dll.a /usr/i686-w64-mingw32/sys-root/mingw/lib
-
-
-#RUN git clone https://github.com/iltommi/PythonQt-1.git && cd PythonQt-1 && mkdir cross && cd cross # && mingw32-cmake .. && make -j$(nproc)
-
         
 # Neutrino
 RUN git clone --recursive -j$(nproc) https://github.com/NeutrinoToolkit/Neutrino.git ; \
-   mkdir Neutrino/cross && cd Neutrino/cross && mingw32-cmake .. && make -j$(nproc) package
+    cd Neutrino/PythonQt && mkdir cross && cd cross &&  mingw32-cmake .. -DQt5_DIR=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmake/Qt5 -DPythonQt_Wrap_QtAll=TRUE && make -j$(nproc) install; cd ../..
+    mkdir cross && cd cross && mingw32-cmake .. && make -j$(nproc) package
  
  
-#docker run --rm -v $(pwd):/mnt -t pippo /bin/sh -c 'cp /Neutrino/cross/Neutrino* /mnt'
+#docker run --rm -v $(pwd):/mnt -t iltommi/neutrino-docker-cross /bin/sh -c 'cp /Neutrino/cross/Neutrino* /mnt'
+
