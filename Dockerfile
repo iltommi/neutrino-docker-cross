@@ -52,7 +52,9 @@ RUN wget https://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.10/src/hdf-4.2.10.
         
 # Neutrino
 RUN git clone --recursive -j$(nproc) https://github.com/NeutrinoToolkit/Neutrino.git ; \
-    cd Neutrino/PythonQt && mkdir cross && cd cross &&  mingw32-cmake .. -DQt5_DIR=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmake/Qt5 -DPythonQt_Wrap_QtAll=TRUE && make -j$(nproc) install; cd ../..
+    cd Neutrino/PythonQt && mkdir cross && cd cross; \
+    mingw32-cmake .. -DQt5_DIR=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmake/Qt5 -DPythonQt_Wrap_QtAll=TRUE ;\
+    make -j$(nproc) install; cd ../.. ; \
     mkdir cross && cd cross && mingw32-cmake .. && make -j$(nproc) package
  
  
